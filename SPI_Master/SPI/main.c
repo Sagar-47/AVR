@@ -27,7 +27,9 @@ void USART_Transmit( unsigned char data )
 	while ( !( UCSRA & (1<<UDRE)) );
 	/* Put data into buffer, sends the data */
 	UDR = data;
-}unsigned char USART_Recieve( void )
+}
+
+unsigned char USART_Recieve( void )
 {
 	/* Wait for empty transmit buffer */
 	while ( !( UCSRA & (1<<RXC)) );
@@ -38,7 +40,7 @@ void USART_Transmit( unsigned char data )
 void SPI_MasterInit(void)
 {
 	/* Set MOSI and SCK output, all others input */
-	DDRB = (1<<PINB5)|(1<<PINB7);
+	DDRB = (1<<PINB5)|(1<<PINB7)|(1<<PINB4);
 	/* Enable SPI, Master, set clock rate fck/16 */
 	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
 }
