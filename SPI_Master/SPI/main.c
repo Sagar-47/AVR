@@ -40,7 +40,7 @@ unsigned char USART_Recieve( void )
 void SPI_MasterInit(void)
 {
 	/* Set MOSI and SCK output, all others input */
-	DDRB = (1<<PINB5)|(1<<PINB7)|(1<<PINB4);
+	DDRB = 0b10110000;
 	/* Enable SPI, Master, set clock rate fck/16 */
 	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
 }
@@ -50,7 +50,6 @@ void SPI_MasterTransreceiver(unsigned char cData)
 	SPDR = cData;
 	/* Wait for transmission complete */
 	while(!(SPSR & (1<<SPIF)));
-	return SPDR;
 	
 }
 
@@ -61,8 +60,8 @@ int main(void)
     while(1) 
     {
 		unsigned char data_1 = USART_Recieve();
-		unsigned char d =  SPI_MasterTransreceiver(data_1);
-		USART_Transmit(d);
+		SPI_MasterTransreceiver(data_1);
+		USART_Transmit(SPDR);
     }
 }
 
