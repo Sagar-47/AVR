@@ -71,6 +71,7 @@ unsigned char Slave_recieve()
 int main(void)
 {
 	USART_Init(95);
+	Slave_init();
     while (1) 
     {
 		unsigned char data_1 = Slave_recieve();
