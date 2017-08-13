@@ -43,7 +43,7 @@ void Slave_init()
 }
 
 
-unsigned char Slave_recieve() 
+unsigned char Slave_receive() 
 {
 	//TWCR  = (1<<TWEA)|(1<<TWEN);
 	/*#if defined(TWCR)
@@ -56,16 +56,29 @@ unsigned char Slave_recieve()
 	while((TWSR & 0xF8)!= 0x60)  // Loop till correct acknowledgment have been received
 	{
 		// Get acknowledgment, Enable TWI, Clear TWI interrupt flag
-		TWCR=(1<<TWEA)|(1<<TWEN)|(1<<TWINT);
-		while (!(TWCR & (1<<TWINT)));  // Wait for TWINT flag
+		TWCR=(1<<TWEA)|(1<<TWEN)|(1<<TWINT); //Sending Acknowgledegment to Master requires TWINT,TWEN also to be set to 1.
+		while (!(TWCR & (1<<TWINT)));  // Wait for TWINT flag, Wait until previous action has been completed.
 	}
+	//Address has been received in TWDR.
 	// Clear TWI interrupt flag,Get acknowledgment, Enable TWI
-	TWCR= (1<<TWINT)|(1<<TWEA)|(1<<TWEN);
-	while (!(TWCR & (1<<TWINT))); // Wait for TWINT flag
-	while((TWSR & 0xF8)!=0x80); // Wait for acknowledgment
-	unsigned char recv_data;
-	return recv_data=TWDR; // Get value from TWDR
+	while((TWSR & 0xF8)!=0x80); // Wait for acknowledgment, Wait until previous action has been completed.
+	{
+		TWCR= (1<<TWINT)|(1<<TWEA)|(1<<TWEN);  //Sending Acknowgledegment to Master requires TWINT,TWEN also to be set to 1.
+		while (!(TWCR & (1<<TWINT))); // Wait for TWINT flag
+	}
+	//DATA has been received in TWDR.
 	
+	/*An Alternative
+	TWCR= (1<<TWINT)|(1<<TWEA)|(1<<TWEN);  //Sending Acknowgledegment to Master requires TWINT,TWEN also to be set to 1.
+	while (!(TWCR & (1<<TWINT))); // Wait for TWINT flag
+	//data=TWDR; data will store the value of Address.
+	//TWDR has the value of address.
+	while((TWSR & 0xF8)!=0x80); // Wait for acknowledgment, Wait until previous action has been completed.
+	//DATA has been received in TWDR.*/ //Don't know why this alternative works
+	
+	unsigned char recv_data;
+	return recv_data=TWDR; // Get value from TWDR,data is directly stored in TWDR
+
 }
 
 int main(void)
