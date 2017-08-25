@@ -87,7 +87,7 @@ int main(void)
 	Slave_init();
     while (1) 
     {
-		unsigned char data_1 = Slave_recieve();
+		unsigned char data_1 = Slave_receive();
 		USART_Transmit(data_1);
 		_delay_ms(100);
     }
