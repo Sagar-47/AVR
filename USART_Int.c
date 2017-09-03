@@ -32,7 +32,7 @@ void USART_Init( unsigned int ubrr)
 int main(void)
 {
     /* Replace with your application code */
-   USART_Init( BAUD_PRESCALER);
+   USART_Init(95);
     sei(); // Enable the Global Interrupt Enable flag so that interrupts can be processed
     while(1)
 	{	
