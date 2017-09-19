@@ -53,7 +53,7 @@ void TWI_START()
 	TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
 	/* setting TWINT, Declaring Master and transmitting Start condition if Bus is available, activating TWI mode*/
 	 while (!(TWCR &(1<<TWINT)));/* Wait for START BIT to be transmitted. TWINT is set - START condition has been transmitted.*/
-	 while((TWSR & 0xF8) != 0x08);/*checking for errors. Start bit successfully transmitted. Confirming control over Bus lines*/
+	 while((TWSR & 0xF8) != 0x08);/*Acknowledgement received. Start bit successfully transmitted. Confirming control over Bus lines*/
 }
 void TWI_Address(unsigned int a)
 {
