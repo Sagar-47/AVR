@@ -41,50 +41,61 @@ unsigned char USART_Recieve( void )
 	return UDR;
 }
 
+void TWI_Init()
+{
+	
+	TWBR=0b00100000;//set Baud rate ton 100kHZ
+	TWSR=(0<<TWPS1)|(0<<TWPS0);//set prescalar to 1
+}
+ 
+void TWI_START()
+{
+	TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
+	/* setting TWINT, Declaring Master and transmitting Start condition if Bus is available, activating TWI mode*/
+	 while (!(TWCR &(1<<TWINT)));/* Wait for START BIT to be transmitted. TWINT is set - START condition has been transmitted.*/
+	 while((TWSR & 0xF8) != 0x08);/*checking for errors. Start bit successfully transmitted. Confirming control over Bus lines*/
+}
+void TWI_Address(unsigned int a)
+{
+	unsigned int a = 0x20;
+	TWDR = 0x20; /*Loading address*/
+	TWCR = (1<<TWINT) |(1<<TWEN);/*clearing TWINT, setting TWI transmission active*/
+	while (!(TWCR &(1<<TWINT)));/* Waiting for Action Completion */
+	while((TWSR & 0xF8) != 0x18/*MT_SLA_ACK*/);/*Check Completion of Address transmission and receiving Address Acknowledgement*/
+}
+
+void SLA_Transmit(unsigned char data)
+{
+	
+	
+	TWDR = data; /* Load Data to be sent*/
+	TWCR = (1<<TWINT) | (1<<TWEN); /*Transmitiing Data*/
+	while (!(TWCR & (1<<TWINT))); /* Waiting for Action Completion */
+	while((TWSR & 0xF8) != 0x28/*MT_SLA_ACK*/);/*Completed transmission of transmission of Data, and receiving acknowledgement for the same*/
+	USART_Transmit(TWSR & 0xF8);/*Check what is recieved as acknowledgement*/
+}
+
+void TWI_Stop()
+{
+	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWSTO); /* Transmit stop condition*/
+	while(!(TWCR & (1<<TWSTO))); /*Waiting for stop condition to be transmitted*/
+}
+
 void ERROR()
 {
 	USART_Transmit('E');
 }
-void SLA_Transmit(unsigned char data)
-{
-	TWBR=0b00100000;//set Baud rate ton 100kHZ
-	TWSR=(0<<TWPS1)|(0<<TWPS0);//set prescalar to 1
-	TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
-	/* setting TWINT, Declaring Master and transmitting Start condition if Bus is available, activating TWI mode*/
-	USART_Transmit('1');
-	 while (!(TWCR &(1<<TWINT)));/* Wait for START BIT to be transmitted. TWINT is set - START condition has been transmitted.*/
-	 USART_Transmit('2');
-	 while((TWSR & 0xF8) != 0x08);/*checking for errors*/
-    USART_Transmit('3');
-	unsigned int a = 0x20;
-	TWDR = 0x20; /*Loading address*/
-	USART_Transmit('4');
-	TWCR = (1<<TWINT) |(1<<TWEN);/*clearing TWINT, setting TWI transmission active*/
-	USART_Transmit('5');
-	while (!(TWCR &(1<<TWINT)));/*Address transmitted, ACK received*/
-	USART_Transmit('6');
-	while((TWSR & 0xF8) != 0x18/*MT_SLA_ACK*/);
-	TWDR = data; /* Load Data to be sent*/
-	USART_Transmit('B');
-	TWCR = (1<<TWINT) | (1<<TWEN); /*Transmitiing Data*/
-	USART_Transmit('c');
-	while (!(TWCR & (1<<TWINT))); /* Data transmitted ACK received*/
-	USART_Transmit('d');
-	while((TWSR & 0xF8) != 0x28/*MT_SLA_ACK*/);
-	USART_Transmit(TWSR & 0xF8);
-	USART_Transmit('e');
-	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWSTO); /* Transmit stop condition*/
-	USART_Transmit('f');
-	while(!(TWCR & (1<<TWSTO)));
-	USART_Transmit('g');
-		
-}
+
 int main(void)
 {
 	USART_Init(95);
 	while (1) 
     {
+		TWI_Init();
+		TWI_START();
+		TWI_Address();
 		SLA_Transmit('a');
+		TWI_Stop();
 		_delay_ms(100);
     }
 }
